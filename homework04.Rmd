@@ -9,22 +9,45 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## DAAG
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+### Exercise 6
+```{r DAAG - Exercise 6}
+library(DAAG)
+nihills <- hills2000
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+nihills.lm <- lm(time ~ dist+climb, data=nihills)
+nihills2.lm <- lm(time ~ dist+climb+dist:climb, data=nihills)
+anova(nihills.lm, nihills2.lm)
+summary(nihills2.lm)
+summary(nihills.lm)
 
-```{r cars}
-summary(cars)
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r DAAG - Exercise 6}
+plot(nihills2.lm)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+From the Residual vs Fitted plot it is possble to notice that the variability is not constant while from the Q-Q plot two main outliers (Pentland and  12 Trig Trog).
+Now, let's remove those two outliers and re-fit the models.
+```{r DAAG - Exercise 6}
+nihills_modified <- nihills[!(rownames(nihills)=="12 Trig Trog" | rownames(nihills)=="Pentland"),]
+nihills_modified_lm <- lm(time ~ dist+climb, data=nihills_modified)
+nihills_modified_lm2 <- lm(time ~ dist+climb+dist:climb, data=nihills_modified)
+anova(nihills_modified_lm, nihills_modified_lm2)
+summary(nihills_modified_lm2)
+summary(nihills_modified_lm)
+```
+```{r DAAG - Exercise 6}
+plot(nihills_modified_lm)
+```
+```{r DAAG - Exercise 6}
+plot(nihills_modified_lm2)
+```
+Now it seems like that the linear model $time = \beta_0+\beta_1*dist+\beta_2*climb$ behaves better in therms of the $F$-statistic that the $time = \beta_0+\beta_1*dist+\beta_2*climb + \beta_3*dist*climb$ model. However, they both clearly show a lower variability than before according to the plots Residuals vs Fitted and scale location.
+
+
+
+
+
+
