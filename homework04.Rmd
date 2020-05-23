@@ -46,7 +46,19 @@ plot(nihills_modified_lm2)
 ```
 Now it seems like that the linear model $time = \beta_0+\beta_1*dist+\beta_2*climb$ behaves better in therms of the $F$-statistic that the $time = \beta_0+\beta_1*dist+\beta_2*climb + \beta_3*dist*climb$ model. However, they both clearly show a lower variability than before according to the plots Residuals vs Fitted and scale location.
 
+### Exercise 8
 
+```{r DAAG - Exercise 8}
+minor_head_injury <- head.injury
+model <- glm(clinically.important.brain.injury~., family = binomial, data = minor_head_injury)
+summary(model)
+```
+The summary functions shows us that the variable GCS.decrease is not significance as it's p-value it is almost 0.5. We can then get rid of it:
+
+```{r DAAG - Exercise 8}
+model <- glm(clinically.important.brain.injury~.-GCS.decrease, family = binomial, data = minor_head_injury)
+summary(model)
+```
 
 
 
