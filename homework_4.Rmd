@@ -270,7 +270,7 @@ y.lm2 <- lm(y ~ x1 + factor(x2)) # correct model
 coef(y.lm2)
 
 ```
-With `x2 <- rbinom(10, 1, x1)`, in the linear model $y = \beta_0+\beta_1x_2$ the `x2` coefficient has a positive effect on the response variable (before it had a negative effect, i.e. -1.03) and the intercept has still a positive effect, but lower (from $3.27$ to $1.06$). As regards the model $y = \beta_0+\beta_1x_1+\beta_2x_2$ the is no significant difference than the former situation.
+With `x2 <- rbinom(10, 1, x1)`, in the linear model $y = \beta_0+\beta_2x_2$ the $\x_2$ predictor has a positive effect on the response variable (before it had a negative effect, i.e. -1.03) and the intercept has still a positive effect, but lower (from $3.27$ to $1.06$). As regards the model $y = \beta_0+\beta_1x_1+\beta_2x_2$ there is no significant difference than the former situation.
 
 ```{r, echo=TRUE}
 x2 <- rbinom(10, 1, .5) # observed predictor which depends
@@ -284,21 +284,20 @@ coef(y.lm)
 y.lm2 <- lm(y ~ x1 + factor(x2)) # correct model
 coef(y.lm2)
 ```
-Finally, for `x2 <- rbinom(10, 1, .5)` we have that the coefficient is independent w.r.t. `x1`. The result is the first model is still that the `x2` conefficient has positive effect, and it is possible to notice that it is circa the mean of the two previous values of `x2`, i.e. 3.058855 and -1.031883. The second model still behaves in a similar way to the previous ones.
-
+Finally, for `x2 <- rbinom(10, 1, .5)` we have that the coefficient is independent w.r.t. `x1`. We can notice that the `x2` predictor has positive effect and the second model still behaves in a similar way to the previous ones. However, the coefficient values have decreased compared to those obtained using `x2 <- rbinom(10, 1, x1)`; hence, the effect of the predictors $x_1$ and $x_2$ is reduced.
 
 ## DAAG: Chapter 8: exercises 1,2,3,6.
 
 ### Exercise 1
 **The following table shows numbers of occasions when inhibition (i.e., no flow of current across a membrane) occurred within 120 s, for different concentrations of the protein peptide-C (data are used with the permission of Claudia Haarmann, who obtained these data in the course of her PhD research). The outcome `yes` implies that inhibition has occurred.**
 ```
-conc 0.1  0.5  1  10  20  30    50  70  80 100 150
-no     7     1   10    9    2    9    13   1     1    4    3
-yes    0     0     3    4    0    6     7    0     0    1    7
+conc 0.1 0.5  1 10 20 30 50 70 80 100 150
+no     7   1 10  9  2  9 13  1  1   4   3
+yes    0   0  3  4  0  6  7  0  0   1   7
 ```
 **Use logistic regression to model the probability of inhibition as a function of protein concentration.**  
 
-**Solution**  
+**Solution** 
 ```{r, echo=TRUE}
 conc <- c(0.1, 0.5, 1, 10, 20, 30, 50, 70, 80, 100, 150)
 no <- c(7, 1, 10, 9, 2, 9, 13, 1, 1, 4,  3)
@@ -384,6 +383,10 @@ x <- seq(0, 0.99, 0.01)
 simulated <- poissonsim(x , a = 2, b = -4, seed=123)
 model <- glm(y ~ x, family = poisson, data = simulated)
 estimated_coeff <- summary(model)$coeff
+estimated_coeff
+```
+
+```{r, echo=TRUE}
 simulated2 <- poissonsim(x, a = estimated_coeff[1], b = estimated_coeff[2], seed = 123)
 mean(simulated$y == simulated2$y) # y is the Poisson response vector
 ```

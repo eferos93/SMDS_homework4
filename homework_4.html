@@ -508,10 +508,10 @@ bootsrap_lm_ridge &lt;- function(formula, data, repetitions, lambda){
 }</code></pre>
 <pre class="r"><code>bootsrap_lm(formula=brainwt~., data=litters, repetitions = 10^4)</code></pre>
 <pre><code>##      2.5%     97.5% 
-## 0.4056711 0.4230196</code></pre>
+## 0.4054446 0.4230467</code></pre>
 <pre class="r"><code>bootsrap_lm_ridge(formula=brainwt~., data=litters, repetitions = 10^4, lambda = 0.118)</code></pre>
 <pre><code>##      2.5%     97.5% 
-## 0.4045810 0.4219979</code></pre>
+## 0.4046598 0.4218606</code></pre>
 <pre class="r"><code>estimate &lt;- data.frame(lsize=10, bodywt=7)
 predict.lm(lm(brainwt~., data=litters), estimate, interval = &quot;confidence&quot;)</code></pre>
 <pre><code>##         fit       lwr       upr
@@ -586,7 +586,7 @@ y.lm2 &lt;- lm(y ~ x1 + factor(x2)) # correct model
 coef(y.lm2)</code></pre>
 <pre><code>## (Intercept)          x1 factor(x2)1 
 ## -0.01962019  4.95135146  1.09934198</code></pre>
-<p>With <code>x2 &lt;- rbinom(10, 1, x1)</code>, in the linear model <span class="math inline">\(y = \beta_0+\beta_1x_2\)</span> the <code>x2</code> coefficient has a positive effect on the response variable (before it had a negative effect, i.e. -1.03) and the intercept has still a positive effect, but lower (from <span class="math inline">\(3.27\)</span> to <span class="math inline">\(1.06\)</span>). As regards the model <span class="math inline">\(y = \beta_0+\beta_1x_1+\beta_2x_2\)</span> the is no significant difference than the former situation.</p>
+<p>With <code>x2 &lt;- rbinom(10, 1, x1)</code>, in the linear model <span class="math inline">\(y = \beta_0+\beta_2x_2\)</span> the <span class="math inline">\(\x_2\)</span> predictor has a positive effect on the response variable (before it had a negative effect, i.e. -1.03) and the intercept has still a positive effect, but lower (from <span class="math inline">\(3.27\)</span> to <span class="math inline">\(1.06\)</span>). As regards the model <span class="math inline">\(y = \beta_0+\beta_1x_1+\beta_2x_2\)</span> there is no significant difference than the former situation.</p>
 <pre class="r"><code>x2 &lt;- rbinom(10, 1, .5) # observed predictor which depends
 # on missing predictor
 y &lt;- 5*x1 + x2 + rnorm(10,sd=.1) # simulated model; coef
@@ -601,7 +601,7 @@ y.lm2 &lt;- lm(y ~ x1 + factor(x2)) # correct model
 coef(y.lm2)</code></pre>
 <pre><code>## (Intercept)          x1 factor(x2)1 
 ## -0.08730307  4.92037521  1.08597386</code></pre>
-<p>Finally, for <code>x2 &lt;- rbinom(10, 1, .5)</code> we have that the coefficient is independent w.r.t. <code>x1</code>. The result is the first model is still that the <code>x2</code> conefficient has positive effect, and it is possible to notice that it is circa the mean of the two previous values of <code>x2</code>, i.e. 3.058855 and -1.031883. The second model still behaves in a similar way to the previous ones.</p>
+<p>Finally, for <code>x2 &lt;- rbinom(10, 1, .5)</code> we have that the coefficient is independent w.r.t. <code>x1</code>. We can notice that the <code>x2</code> predictor has positive effect and the second model still behaves in a similar way to the previous ones. However, the coefficient values have decreased compared to those obtained using <code>x2 &lt;- rbinom(10, 1, x1)</code>; hence, the effect of the predictors <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> is reduced.</p>
 </div>
 </div>
 <div id="daag-chapter-8-exercises-1236." class="section level2">
@@ -609,9 +609,9 @@ coef(y.lm2)</code></pre>
 <div id="exercise-1" class="section level3">
 <h3>Exercise 1</h3>
 <p><strong>The following table shows numbers of occasions when inhibition (i.e., no flow of current across a membrane) occurred within 120 s, for different concentrations of the protein peptide-C (data are used with the permission of Claudia Haarmann, who obtained these data in the course of her PhD research). The outcome <code>yes</code> implies that inhibition has occurred.</strong></p>
-<pre><code>conc 0.1  0.5  1  10  20  30    50  70  80 100 150
-no     7     1   10    9    2    9    13   1     1    4    3
-yes    0     0     3    4    0    6     7    0     0    1    7</code></pre>
+<pre><code>conc 0.1 0.5  1 10 20 30 50 70 80 100 150
+no     7   1 10  9  2  9 13  1  1   4   3
+yes    0   0  3  4  0  6  7  0  0   1   7</code></pre>
 <p><strong>Use logistic regression to model the probability of inhibition as a function of protein concentration.</strong></p>
 <p><strong>Solution</strong></p>
 <pre class="r"><code>conc &lt;- c(0.1, 0.5, 1, 10, 20, 30, 50, 70, 80, 100, 150)
@@ -833,7 +833,11 @@ x &lt;- seq(0, 0.99, 0.01)
 simulated &lt;- poissonsim(x , a = 2, b = -4, seed=123)
 model &lt;- glm(y ~ x, family = poisson, data = simulated)
 estimated_coeff &lt;- summary(model)$coeff
-simulated2 &lt;- poissonsim(x, a = estimated_coeff[1], b = estimated_coeff[2], seed = 123)
+estimated_coeff</code></pre>
+<pre><code>##              Estimate Std. Error   z value     Pr(&gt;|z|)
+## (Intercept)  2.169687  0.1036690  20.92897 2.917034e-97
+## x           -4.494277  0.3651332 -12.30860 8.142760e-35</code></pre>
+<pre class="r"><code>simulated2 &lt;- poissonsim(x, a = estimated_coeff[1], b = estimated_coeff[2], seed = 123)
 mean(simulated$y == simulated2$y) # y is the Poisson response vector</code></pre>
 <pre><code>## [1] 0.83</code></pre>
 <p>The predictions of the estimated model are the same as those of the true model in 83% of cases.</p>
