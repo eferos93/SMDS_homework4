@@ -92,13 +92,10 @@ Moreover, from the diganostic plot of ``nihills.lm`` we also suspect that the po
 Moreover, looking to the diagnostic plots of `nihill.lm2` we see that `Slieve Donard` and `Meelbeg Meelmore`  also have high residuals. 
 
 Thus, we decide to remove all of these suspected points:
-
-
 ```{r}
 library(dplyr) # for using %>% operator
-nihills <- 
-  list("Seven Sevens", "Annalong Horseshoe", "Slieve Donard", "Meelbeg Meelmore", "Flagstaff to Carling") %>% 
-  subset(nihills, !(rownames(nihills) %in% .))
+names <- list("Seven Sevens", "Annalong Horseshoe", "Slieve Donard", "Meelbeg Meelmore", "Flagstaff to Carling")
+nihills <- subset(nihills, !(rownames(nihills) %in% names))
 ```
 
 Without these points we do the two fits another time and we are going to see if the $F$-test is still rejected:
@@ -207,8 +204,8 @@ predict.lm(lm(brainwt~., data=litters), estimate, interval = "confidence")
 
 We can observe that our boostrap-confidence interval results to be quite similar for both models. 
 Moreover, these intervals results to be similar also to the built-in function provided by `predict.lm` method.
-### Exercise 10
 
+### Exercise 10
 **The data frame `table.b3` in the `MPV` package contains data on gas mileage and 11 other variables for a sample of 32 automobiles.**
 
 **(a) Construct a scatterplot of `y` (mpg) versus `x1` (displacement). Is the relationship between these variables non-linear?**  
@@ -289,7 +286,7 @@ y.lm2 <- lm(y ~ x1 + factor(x2)) # correct model
 coef(y.lm2)
 
 ```
-With `x2 <- rbinom(10, 1, x1)`, in the linear model $y = \beta_0+\beta_2x_2$ the $\x_2$ predictor has a positive effect on the response variable (before it had a negative effect, i.e. -1.03) and the intercept has still a positive effect, but lower (from $3.27$ to $1.06$). As regards the model $y = \beta_0+\beta_1x_1+\beta_2x_2$ there is no significant difference than the former situation.
+With `x2 <- rbinom(10, 1, x1)`, in the linear model $y = \beta_0+\beta_2x_2$ the $x_2$ predictor has a positive effect on the response variable (before it had a negative effect, i.e. -1.03) and the intercept has still a positive effect, but lower (from $3.27$ to $1.06$). As regards the model $y = \beta_0+\beta_1x_1+\beta_2x_2$ there is no significant difference than the former situation.
 
 ```{r, echo=TRUE}
 x2 <- rbinom(10, 1, .5) # observed predictor which depends
@@ -333,17 +330,24 @@ From these results, we see that a unit increase in `conc` increases the logit wi
 
 **Solution**
 ```{r, echo=TRUE}
+# fit the model
 minor_head_injury <- head.injury
 minor_head_injury <- lapply(minor_head_injury, as.factor)
 model <- glm(clinically.important.brain.injury~., family = binomial, data = minor_head_injury)
 summary(model)
 ```
-The summary functions shows us that the variable GCS.decrease is not significance as it's p-value it is almost 0.5. We can then get rid of it:
-
+The summary function shows us that the variable `GCS.decrease` is not significance as its p-value is almost $0.5$. Thus, we remove it from our model:
 ```{r, echo=TRUE}
 model <- glm(clinically.important.brain.injury~.-GCS.decrease, family = binomial, data = minor_head_injury)
 summary(model)
 ```
+In order to desume a decision rule for use of CT using a risk threshold of $p=0.025$, we can consider the logit of p $log\bigg(\frac{p}{1-p}\bigg)=-3.66$ which is given by some combinations of predictors. Since the estimated intercept is equal to $-4.4889$ and keeping in mind that our predictors assume $1$ value if a certain clinical characteristic is present and $0$ value otherwise, patients will be sent for CT if they have a combination of clinical conditions that returns a value greater or equal to $-3.66+4.4889=0.8289$.   
+This risk results from:  
+
+1. any of the predictors `age.65`, `basal.skull.fracture`, `GCS.13`, `GCS.15.2hours`, `high.risk`, `loss.of.consciousness` and `vomiting`, regardless of the presence or absence of other clinical conditions;  
+2. `amnesia.before` or `open.skull.fracture` with any of the other predictors.
+
+Thus, a patient should be sent for CT if conditions $1.$ or $2.$ are met.
 
 ### Exercise 3
 
