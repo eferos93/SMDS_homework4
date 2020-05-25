@@ -70,7 +70,7 @@ nihills2.lm <- lm(time ~ dist+climb+dist:climb, data=nihills)
 anova(nihills.lm, nihills2.lm)
 ```
 
-The result of the $F$ test give raise to a p-value, which is the probability that the $F$ statistics is grater than the one observed assuming the null hypotesis that the coefficient relative to `dist x climb` , is quite low. Thus we can reject the null hypotesis and therefore say that `nihills2.lm`, that is, the most complex model including an interaction term, appears as significantly better than Model 1 for `nihills` data. 
+The result of the $F$ test give raise to a p-value, which is the probability that the $F$ statistics is grater than the one observed assuming the null hypotesis relative to `dist x climb` , is quite low. Thus we can reject the null hypotesis and therefore say that `nihills2.lm`, the most complex model that includes an interaction term, appears significantly better than Model 1 for `nihills` data. 
 
 For having a more precise view of the two models we proceed to examine the diagnostic plots:
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
@@ -86,10 +86,10 @@ plot(nihills2.lm)
 ```
 
 
-Looking to these plots of the two fit at first istance we observe that Seven Sevens obs. looks to be a suspect point. This point has an unexpected residual and looks to have a large influence to the fit.
-In fact, the `Residual vs Leverage` plot  suggest that this point has a very large leverage. We think that `Seven Sevens` observation is clearly an outlier that has a great impact on the fit.
+Looking to these plots of the two fit at first istance we observe that `Seven Sevens` observation looks to be a suspect point. This point has an unexpected residual and looks to have a large influence to the fit.
+In fact, the `Residual vs Leverage` plot suggest that this point has a very large leverage and, at the same time, a high standardized residual. We think then `Seven Sevens` is clearly an outlier that has a great impact on the fit.
 Moreover, from the diganostic plot of ``nihills.lm`` we also suspect that the points `Annalong Horseshoe`, `Flagstaff to Carling`' seems problematic since they result to have an unexpected distribution of their residuals.
-Looking to the plots of `nihill.lm2` we see that `Slieve Donard` and `Meelbeg Meelmore`  also have high residuals. 
+Moreover, looking to the diagnostic plots of `nihill.lm2` we see that `Slieve Donard` and `Meelbeg Meelmore`  also have high residuals. 
 
 Thus, we decide to remove all of these suspected points:
 
@@ -102,7 +102,7 @@ nihills <- nihills[rownames(nihills) != "Flagstaff to Carling",]
 ```
 
 
-Without these points we do the two fits another time and we are going to see whether the $F$-test is still rejected:
+Without these points we do the two fits another time and we are going to see if the $F$-test is still rejected:
 
 ```{r}
 # Refit models
@@ -111,9 +111,27 @@ nihills2.lm <- lm(time ~ dist + climb + dist:climb, data = nihills)
 anova(nihills.lm, nihills2.lm)
 ```
 
-After removing the problematic points, the $F$-test on the new fitted models shows that there is no significant improvement in the more complex model over the simple one. 
+Let's examine again the diagnostic plots:
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+## model: time = b0 + b1 dist + b2 climb
+par(mfrow=c(2,2))
+plot(nihills.lm)
+```
+
+```{r echo=TRUE, message=FALSE,warning=FALSE}
+## model: time = b0 + b1 dist + b2 climb + b3 (dist x climb)
+par(mfrow=c(2,2))
+plot(nihills2.lm)
+```
+
+Without the removed points now it looks that both model don't have points with high residual or leverage. 
+
+Moreover, the $F$-test on the new fitted models shows that there is no significant improvement in the more complex model over the simple one. 
 
 The previous tentative choice was a mistake driven by outliers. Without them, there's no statistical justification that prefers one model respect to the other.
+
+
 
 ### Exercise 8
 
@@ -145,9 +163,9 @@ litters_lm_ridge <- lm.ridge(brainwt~., data=litters, lambda = 0.118)
 litters_lm_ridge
 ```
 
-For ridge regression case both `bodywt` and `lsize` coefficients are penalized in favor of the intercept. 
+For ridge regression case both `bodywt` and `lsize` coefficients are penalized in favor to the intercept. 
 
-In order to obtain the 95% percentile confidence intervals with bootstrap sampling we decided to build the following two functions that, given the formula model, the data, the number of bootsrap repetitions and the regularization parameter $\lambda$ would give as output the 95% confidence intervale for the value of `brainwt` when `lsize = 10 ` and `bodywt = 7`.
+In order to obtain the 95% percentile confidence intervals with bootstrap sampling we decided to build the following two functions that, given the formula model, the data, the number of bootsrap repetitions and the regularization parameter $\lambda$ would give as output the 95% confidence intervale for the value of `brainwt` when `lsize = 10 ` and `bodywt = 7`. Confidence intervals extremes are taken considering the empirical quantiles of the estimates made with boostrap sampling, assuming that each of these estimate is distributed normally with mean $\mu = \beta_0 + \beta_1 X_{\text{lsize}} + \beta_2 X_{\text{bodywt}}$, where $\beta_0, \beta_1, \beta_2$ are the population regression line coefficients. 
 ```{r}
 bootsrap_lm <- function(formula, data, repetitions){
   n <- nrow(data)
@@ -188,6 +206,8 @@ estimate <- data.frame(lsize=10, bodywt=7)
 predict.lm(lm(brainwt~., data=litters), estimate, interval = "confidence")
 ```
 
+We can observe that our boostrap-confidence interval results to be quite similar for both models. 
+Moreover, these intervals results to be similar also to the built-in function provided by `predict.lm` method.
 ### Exercise 10
 
 **The data frame `table.b3` in the `MPV` package contains data on gas mileage and 11 other variables for a sample of 32 automobiles.**
@@ -342,9 +362,8 @@ summary(A.glm <- glm(A ~ habitat + log(meters), family=quasipoisson, data=moths)
 summary(A.glm <- glm(A ~ habitat + log(meters), family=poisson, data=moths))
 ```
 
-The dispersion estimate was $2.69$. Using the quasipoisson family has increased all the standard errors by a factor of $\sqrt{2.69}$ relative to the poisson family.
-Standard errors and p-values taken from a model that assumed Poisson errors
-would be highly misleading because even if they are low, the model takes into in account assumptions on the data that they are not true, like that the dispersion parameter is equal to 1.
+The dispersion estimate was $2.69$. Using the quasipoisson family all the standard errors increase by a factor of $\sqrt{2.69}$ relative to the poisson family.
+Standard errors and p-values taken from a model that assumed Poisson errors would be highly misleading because even if they are low, the model takes into into account assumptions on the data that are not true, like that the dispersion parameter is equal to 1.
 
 
 ```{r}
@@ -352,14 +371,13 @@ sapply(split(moths$P, moths$habitat), sum)
 
 moths$habitat <- relevel(moths$habitat, ref="Lowerside")
 
-P.glm <- glm(P ~ habitat + log(meters), family=quasipoisson, data=moths)
+summary(P.glm <- glm(P ~ habitat + log(meters), family=quasipoisson, data=moths))
 
-P.glm
+
 ```
 
-
-The highest numbers relative to the habitat effect are in this case for SWsoak and for Disturbed.    
-In contrast to what was observed for `A` species, in this case we observe that the coefficient relative to `log(meters)` is statistically significant. Then, . As a result, the length of the transect make difference to the number of moths observed. In particular for each one meter increase in transect length the number of moths increases with transect length by a factor of approximately $ e^{0.55} \simeq 1.74 $.
+The highest numbers relative to the habitat effect are in this case for `SWsoak` and for `Disturbed`.    
+In contrast to what was observed for `A` species, in this case we notice that the coefficient relative to `log(meters)` is statistically significant. Then, the length of the transect make difference to the number of moths observed. In particular for each one meter increase in transect length the number of moths increases with transect length by a factor of approximately $ e^{0.55} \simeq 1.74 $.
 
 
 ### Exercise 6
