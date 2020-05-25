@@ -93,14 +93,13 @@ Moreover, looking to the diagnostic plots of `nihill.lm2` we see that `Slieve Do
 
 Thus, we decide to remove all of these suspected points:
 
-```{r}
-nihills <- nihills[rownames(nihills) != "Seven Sevens",]
-nihills <- nihills[rownames(nihills) != "Annalong Horseshoe",]
-nihills <- nihills[rownames(nihills) != "Slieve Donard",]
-nihills <- nihills[rownames(nihills) != "Meelbeg Meelmore",]
-nihills <- nihills[rownames(nihills) != "Flagstaff to Carling",]
-```
 
+```{r}
+library(dplyr) # for using %>% operator
+nihills <- 
+  list("Seven Sevens", "Annalong Horseshoe", "Slieve Donard", "Meelbeg Meelmore", "Flagstaff to Carling") %>% 
+  subset(nihills, !(rownames(nihills) %in% .))
+```
 
 Without these points we do the two fits another time and we are going to see if the $F$-test is still rejected:
 
