@@ -166,9 +166,8 @@ In order to obtain the 95% percentile confidence intervals with bootstrap sampli
 ```{r}
 bootsrap_lm <- function(formula, data, repetitions){
   n <- nrow(data)
-  B <- repetitions
-  s_vect <- array(0, B)
-  for(i in 1:B) {
+  s_vect <- array(0, repetitions)
+  for(i in 1:repetitions) {
     ind <- sample(1:n, n, replace = TRUE)
     lm.b<-lm(formula, data=data[ind,])
     s_vect[i] <- lm.b$coefficients[1] + lm.b$coefficient[2]*10 + lm.b$coefficient[3]*7
@@ -179,9 +178,8 @@ bootsrap_lm <- function(formula, data, repetitions){
 
 bootsrap_lm_ridge <- function(formula, data, repetitions, lambda){
   n <- nrow(data)
-  B <- repetitions
-  s_vect <- array(0, B)
-  for(i in 1:B) {
+  s_vect <- array(0, repetitions)
+  for(i in 1:repetitions) {
     ind <- sample(1:n, n, replace = TRUE)
     lm.b<-lm.ridge(formula, data=data[ind,], lambda=lambda)
     s_vect[i] <- coef(lm.b)[1] + coef(lm.b)[2]*10 + coef(lm.b)[3]*7
