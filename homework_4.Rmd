@@ -70,7 +70,7 @@ nihills2.lm <- lm(time ~ dist+climb+dist:climb, data=nihills)
 anova(nihills.lm, nihills2.lm)
 ```
 
-The result of the $F$ test give raise to a p-value, which is the probability that the $F$ statistics is grater than the one observed assuming the null hypotesis relative to `dist x climb` , is quite low. Thus we can reject the null hypotesis and therefore say that `nihills2.lm`, the most complex model that includes an interaction term, appears significantly better than Model 1 for `nihills` data. 
+The result of the $F$ test gives raise to a p-value, which is the probability that the $F$ statistics is grater than the one observed assuming the null hypotesis $H_0: \beta_{\text{dist x climb}}=0$, is quite low. Thus we can reject the null hypotesis and therefore say that `nihills2.lm`, the most complex model that includes an interaction term, appears significantly better than Model 1 for `nihills` data. 
 
 For having a more precise view of the two models we proceed to examine the diagnostic plots:
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
@@ -87,19 +87,18 @@ plot(nihills2.lm)
 
 
 Looking to these plots of the two fit at first istance we observe that `Seven Sevens` observation looks to be a suspect point. This point has an unexpected residual and looks to have a large influence to the fit.
-In fact, the `Residual vs Leverage` plot suggest that this point has a very large leverage and, at the same time, a high standardized residual. We think then `Seven Sevens` is clearly an outlier that has a great impact on the fit.
+In fact, the `Residual vs Leverage` plot suggests that this point has a very large leverage and, at the same time, a high standardized residual. We think then `Seven Sevens` is clearly an outlier that has a great impact on the fit.
 Moreover, from the diganostic plot of ``nihills.lm`` we also suspect that the points `Annalong Horseshoe`, `Flagstaff to Carling`' seems problematic since they result to have an unexpected distribution of their residuals.
 Moreover, looking to the diagnostic plots of `nihill.lm2` we see that `Slieve Donard` and `Meelbeg Meelmore`  also have high residuals. 
 
 Thus, we decide to remove all of these suspected points:
 ```{r}
 library(dplyr) # for using %>% operator
-nihills <- 
-  list("Seven Sevens", "Annalong Horseshoe", "Slieve Donard", "Meelbeg Meelmore", "Flagstaff to Carling") %>% 
-  subset(nihills, !(rownames(nihills) %in% .))
+names <- list("Seven Sevens", "Annalong Horseshoe", "Slieve Donard", "Meelbeg Meelmore", "Flagstaff to Carling")
+nihills <- subset(nihills, !(rownames(nihills) %in% names))
 ```
 
-Without these points we do the two fits another time and we are going to see if the $F$-test is still rejected:
+Without these points we do the two fits another time and we are going to see if the null hypothesis is still rejected:
 
 ```{r}
 # Refit models
@@ -122,13 +121,11 @@ par(mfrow=c(2,2))
 plot(nihills2.lm)
 ```
 
-Without the removed points now it looks that both model don't have points with high residual or leverage. 
+Without the removed points now it looks that both models don't have problematic points. However, `Slieve Bearnagh` stands outside the Cook's distance lines and therefore it can be an influential point.
 
 Moreover, the $F$-test on the new fitted models shows that there is no significant improvement in the more complex model over the simple one. 
 
-The previous tentative choice was a mistake driven by outliers. Without them, there's no statistical justification that prefers one model respect to the other.
-
-
+The previous tentative choice was a mistake driven by outliers. Without them, there's no statistical justification to prefer one model respect to the other.
 
 ### Exercise 8
 
@@ -160,9 +157,9 @@ litters_lm_ridge <- lm.ridge(brainwt~., data=litters, lambda = 0.118)
 litters_lm_ridge
 ```
 
-For ridge regression case both `bodywt` and `lsize` coefficients are penalized in favor to the intercept. 
+As expected, for ridge regression case both `bodywt` and `lsize` coefficients are penalized in favor to the intercept. 
 
-In order to obtain the 95% percentile confidence intervals with bootstrap sampling we decided to build the following two functions that, given the formula model, the data, the number of bootsrap repetitions and the regularization parameter $\lambda$ would give as output the 95% confidence intervale for the value of `brainwt` when `lsize = 10 ` and `bodywt = 7`. Confidence intervals extremes are taken considering the empirical quantiles of the estimates made with boostrap sampling, assuming that each of these estimate is distributed normally with mean $\mu = \beta_0 + \beta_1 X_{\text{lsize}} + \beta_2 X_{\text{bodywt}}$, where $\beta_0, \beta_1, \beta_2$ are the population regression line coefficients. 
+In order to obtain the 95% percentile confidence intervals with bootstrap sampling we decided to build the following two functions that, given the formula model, the data, the number of bootsrap repetitions and the regularization parameter $\lambda$ (for ridge regression), would give as output the 95% confidence interval for the value of `brainwt` when `lsize = 10 ` and `bodywt = 7`. Confidence intervals extremes are taken considering the empirical quantiles of the estimates made with boostrap sampling, assuming that each of these estimate is distributed normally with mean $\mu = \beta_0 + \beta_1 X_{\text{lsize}} + \beta_2 X_{\text{bodywt}}$, where $\beta_0, \beta_1, \beta_2$ are the population regression line coefficients. 
 ```{r}
 bootsrap_lm <- function(formula, data, repetitions){
   n <- nrow(data)
@@ -201,8 +198,9 @@ estimate <- data.frame(lsize=10, bodywt=7)
 predict.lm(lm(brainwt~., data=litters), estimate, interval = "confidence")
 ```
 
-We can observe that our boostrap-confidence interval results to be quite similar for both models. 
-Moreover, these intervals results to be similar also to the built-in function provided by `predict.lm` method.
+We can observe that our boostrap-confidence interval are quite similar for both models. 
+Moreover, these intervals are similar also to the ones of the built-in function provided by `predict.lm` method.
+
 
 ### Exercise 10
 **The data frame `table.b3` in the `MPV` package contains data on gas mileage and 11 other variables for a sample of 32 automobiles.**
@@ -340,7 +338,7 @@ The summary function shows us that the variable `GCS.decrease` is not significan
 model <- glm(clinically.important.brain.injury~.-GCS.decrease, family = binomial, data = minor_head_injury)
 summary(model)
 ```
-In order to desume a decision rule for use of CT using a risk threshold of $p=0.025$, we can consider the logit of p $log\bigg(\frac{p}{1-p}\bigg)=-3.66$ which is given by some combinations of predictors. Since the estimated intercept is equal to $-4.4889$ and keeping in mind that our predictors assume $1$ value if a certain clinical characteristic is present and $0$ value otherwise, patients will be sent for CT if they have a combination of clinical conditions that returns a value greater or equal to $-3.66+4.4889=0.8289$.   
+In order to obtain a decision rule for use of CT using a risk threshold of $p=0.025$, we have to identify all patients which have a risk greater or equal than $p$. Considering the logit of p, this is equivalent to state that $log\bigg(\frac{p}{1-p}\bigg)=-3.66 \leq \beta_0 + \beta_1x_1+...+\beta_{10}x_{10}$ where $x_i \in \{0,1\}$ (with i=1,...,10). Since the estimated intercept is equal to $-4.4889$, patients will be sent for CT if they have a combination of clinical conditions that returns a value greater or equal to $-3.66+4.4889=0.8289$.   
 This risk results from:  
 
 1. any of the predictors `age.65`, `basal.skull.fracture`, `GCS.13`, `GCS.15.2hours`, `high.risk`, `loss.of.consciousness` and `vomiting`, regardless of the presence or absence of other clinical conditions;  
