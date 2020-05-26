@@ -93,8 +93,7 @@ Moreover, looking to the diagnostic plots of `nihill.lm2` we see that `Slieve Do
 
 Thus, we decide to remove all of these suspected points:
 ```{r}
-library(dplyr) # for using %>% operator
-names <- list("Seven Sevens", "Annalong Horseshoe", "Slieve Donard", "Meelbeg Meelmore", "Flagstaff to Carling")
+names <- c("Seven Sevens", "Annalong Horseshoe", "Slieve Donard", "Meelbeg Meelmore", "Flagstaff to Carling")
 nihills <- subset(nihills, !(rownames(nihills) %in% names))
 ```
 
