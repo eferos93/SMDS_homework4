@@ -516,10 +516,10 @@ bootsrap_lm_ridge &lt;- function(formula, data, repetitions, lambda){
 }</code></pre>
 <pre class="r"><code>bootsrap_lm(formula=brainwt~., data=litters, repetitions = 10^4)</code></pre>
 <pre><code>##      2.5%     97.5% 
-## 0.4055781 0.4229907</code></pre>
+## 0.4052361 0.4233131</code></pre>
 <pre class="r"><code>bootsrap_lm_ridge(formula=brainwt~., data=litters, repetitions = 10^4, lambda = 0.118)</code></pre>
 <pre><code>##      2.5%     97.5% 
-## 0.4044540 0.4220907</code></pre>
+## 0.4045987 0.4220147</code></pre>
 <pre class="r"><code>estimate &lt;- data.frame(lsize=10, bodywt=7)
 predict.lm(lm(brainwt~., data=litters), estimate, interval = &quot;confidence&quot;)</code></pre>
 <pre><code>##         fit       lwr       upr
@@ -581,36 +581,30 @@ coef(y.lm2)</code></pre>
 ##  -0.1122102   5.1426235   1.0432472</code></pre>
 <p><strong>What happens if <code>x2</code> is generated according to <code>x2 &lt;- rbinom(10, 1, x1)</code>? <code>x2 &lt;- rbinom(10, 1, .5)</code>?</strong></p>
 <p><strong>Solution</strong></p>
-<pre class="r"><code>x2 &lt;- rbinom(10, 1, x1) # observed predictor which depends
-# on missing predictor
-y &lt;- 5*x1 + x2 + rnorm(10,sd=.1) # simulated model; coef
-# of x2 is positive
-y.lm &lt;- lm(y ~ factor(x2)) # model fitted to observed data
+<pre class="r"><code>x2 &lt;- rbinom(10, 1, x1) 
+y &lt;- 5*x1 + x2 + rnorm(10,sd=.1) 
+y.lm &lt;- lm(y ~ factor(x2)) 
 coef(y.lm)</code></pre>
 <pre><code>## (Intercept) factor(x2)1 
 ##    1.063926    3.058855</code></pre>
-<pre class="r"><code> # effect of missing variable:
-# coefficient of x2 has wrong sign
-y.lm2 &lt;- lm(y ~ x1 + factor(x2)) # correct model
+<p>Comparing this result obtained using <code>x2 &lt;- rbinom(10, 1, x1)</code> with the one obtained using <code>x2 &lt;- rbinom(10, 1, 1-x1)</code> in the model with only <span class="math inline">\(x_2\)</span> predictor, we can see that the coefficient of <span class="math inline">\(x_2\)</span> has now a positive sign. Moreover, we notice that the coefficient of <span class="math inline">\(x_2\)</span> is much larger than the expected value that is equal to <span class="math inline">\(1\)</span>. This is due to the fact that <span class="math inline">\(x_2\)</span> also contains the information of <span class="math inline">\(x_1\)</span> since they are dependent.</p>
+<pre class="r"><code>y.lm2 &lt;- lm(y ~ x1 + factor(x2))
 coef(y.lm2)</code></pre>
 <pre><code>## (Intercept)          x1 factor(x2)1 
 ## -0.01962019  4.95135146  1.09934198</code></pre>
-<p>With <code>x2 &lt;- rbinom(10, 1, x1)</code>, in the linear model <span class="math inline">\(y = \beta_0+\beta_2x_2\)</span> the <span class="math inline">\(x_2\)</span> predictor has a positive effect on the response variable (before it had a negative effect, i.e. -1.03) and the intercept has still a positive effect, but lower (from <span class="math inline">\(3.27\)</span> to <span class="math inline">\(1.06\)</span>). As regards the model <span class="math inline">\(y = \beta_0+\beta_1x_1+\beta_2x_2\)</span> there is no significant difference than the former situation.</p>
-<pre class="r"><code>x2 &lt;- rbinom(10, 1, .5) # observed predictor which depends
-# on missing predictor
-y &lt;- 5*x1 + x2 + rnorm(10,sd=.1) # simulated model; coef
-# of x2 is positive
-y.lm &lt;- lm(y ~ factor(x2)) # model fitted to observed data
+<p>Adding the missing predictor <span class="math inline">\(x_1\)</span>, we can notice that the coefficient of <span class="math inline">\(x_2\)</span> is much smaller than the one obtained before since now the variability of the response variable <span class="math inline">\(y\)</span> is highly explained by <span class="math inline">\(x_1\)</span>.</p>
+<pre class="r"><code>x2 &lt;- rbinom(10, 1, .5) 
+y &lt;- 5*x1 + x2 + rnorm(10,sd=.1)
+y.lm &lt;- lm(y ~ factor(x2)) 
 coef(y.lm)</code></pre>
 <pre><code>## (Intercept) factor(x2)1 
 ##    1.909803    1.152584</code></pre>
-<pre class="r"><code> # effect of missing variable:
-# coefficient of x2 has wrong sign
-y.lm2 &lt;- lm(y ~ x1 + factor(x2)) # correct model
+<p>Since now <span class="math inline">\(x_2\)</span> does not depend anymore on <span class="math inline">\(x_1\)</span>, the coefficient of <span class="math inline">\(x_2\)</span> obtained by fitting the model <span class="math inline">\(y=\beta_0 + \beta_2x_2\)</span> is close to <span class="math inline">\(1\)</span> that is the true value of <span class="math inline">\(\beta_2\)</span>.</p>
+<pre class="r"><code>y.lm2 &lt;- lm(y ~ x1 + factor(x2)) 
 coef(y.lm2)</code></pre>
 <pre><code>## (Intercept)          x1 factor(x2)1 
 ## -0.08730307  4.92037521  1.08597386</code></pre>
-<p>Finally, for <code>x2 &lt;- rbinom(10, 1, .5)</code> we have that the coefficient is independent w.r.t. <code>x1</code>. We can notice that the <code>x2</code> predictor has positive effect and the second model still behaves in a similar way to the previous ones. However, the coefficient values have decreased compared to those obtained using <code>x2 &lt;- rbinom(10, 1, x1)</code>; hence, the effect of the predictors <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> is reduced.</p>
+<p>Adding <span class="math inline">\(x_1\)</span> to the model, we see that the estimated coefficient of <span class="math inline">\(x_2\)</span> does not change significantly compared to the model in which we have only <span class="math inline">\(x_2\)</span> as predictor. This is due to the fact that now <span class="math inline">\(x_2\)</span> and <span class="math inline">\(x_1\)</span> are independent since <code>x2 &lt;- rbinom(10, 1, .5)</code> and therefore <span class="math inline">\(x_2\)</span> does not reflect anymore the information explained by <span class="math inline">\(x_1\)</span>.</p>
 </div>
 </div>
 <div id="daag-chapter-8-exercises-1236." class="section level2">
@@ -628,7 +622,7 @@ no &lt;- c(7, 1, 10, 9, 2, 9, 13, 1, 1, 4,  3)
 yes &lt;- c(0, 0, 3, 4, 0, 6, 7, 0, 0, 1, 7)
 tot &lt;- no + yes
 p &lt;- yes / tot      # probability of inhibition
-calls.glm &lt;- glm(p ~ conc, family = binomial, weights = tot)
+calls.glm &lt;- glm(p ~ conc, family = binomial, weights = tot) # logit link is the default
 summary(calls.glm)</code></pre>
 <pre><code>## 
 ## Call:
@@ -729,7 +723,7 @@ summary(model)</code></pre>
 ## AIC: 1221.9
 ## 
 ## Number of Fisher Scoring iterations: 6</code></pre>
-<p>In order to obtain a decision rule for use of CT using a risk threshold of <span class="math inline">\(p=0.025\)</span>, we have to identify all patients which have a risk greater or equal than <span class="math inline">\(p\)</span>. Considering the logit of p, this is equivalent to state that <span class="math inline">\(log\bigg(\frac{p}{1-p}\bigg)=-3.66 \leq \beta_0 + \beta_1x_1+...+\beta_{10}x_{10}\)</span> where <span class="math inline">\(x_i \in \{0,1\}\)</span> (with i=1,…,10). Since the estimated intercept is equal to <span class="math inline">\(-4.4889\)</span>, patients will be sent for CT if they have a combination of clinical conditions that returns a value greater or equal to <span class="math inline">\(-3.66+4.4889=0.8289\)</span>.<br />
+<p>In order to obtain a decision rule for use of CT using a risk threshold of <span class="math inline">\(p=0.025\)</span>, we have to identify all patients which have a risk greater or equal than <span class="math inline">\(p\)</span>. Considering the logit of p, this is equivalent to state that <span class="math inline">\(log\bigg(\frac{p}{1-p}\bigg)=-3.66 \leq \beta_0 + \beta_1x_1+...+\beta_{10}x_{10}\)</span>, where <span class="math inline">\(x_i \in \{0,1\}\)</span> (with i=1,…,10). Since the estimated intercept is equal to <span class="math inline">\(-4.4889\)</span>, patients will be sent for CT if they have a combination of clinical conditions that returns a value greater or equal to <span class="math inline">\(-3.66+4.4889=0.8289\)</span>.<br />
 This risk results from:</p>
 <ol style="list-style-type: decimal">
 <li>any of the predictors <code>age.65</code>, <code>basal.skull.fracture</code>, <code>GCS.13</code>, <code>GCS.15.2hours</code>, <code>high.risk</code>, <code>loss.of.consciousness</code> and <code>vomiting</code>, regardless of the presence or absence of other clinical conditions;<br />
@@ -809,7 +803,7 @@ summary(A.glm &lt;- glm(A ~ habitat + log(meters), family=quasipoisson, data=mot
 ## AIC: 226.71
 ## 
 ## Number of Fisher Scoring iterations: 13</code></pre>
-<p>The dispersion estimate was <span class="math inline">\(2.69\)</span>. Using the quasipoisson family all the standard errors increase by a factor of <span class="math inline">\(\sqrt{2.69}\)</span> relative to the poisson family. Standard errors and p-values taken from a model that assumed Poisson errors would be highly misleading because even if they are low, the model takes into into account assumptions on the data that are not true, like that the dispersion parameter is equal to 1.</p>
+<p>The dispersion parameter estimate is <span class="math inline">\(2.69\)</span>. Using the quasipoisson family all the standard errors increase by a factor of <span class="math inline">\(\sqrt{2.69}\)</span> compared to the ones of the poisson family. Standard errors and p-values taken from a model that assumed Poisson errors would be highly misleading because even if they are low, the model takes into into account assumptions on the data that are not true, like that the dispersion parameter is equal to 1.</p>
 <pre class="r"><code>sapply(split(moths$P, moths$habitat), sum)</code></pre>
 <pre><code>## Lowerside      Bank Disturbed    NEsoak    NWsoak    SEsoak    SWsoak 
 ##        17         4        33        14        19         6        48 
@@ -848,8 +842,8 @@ summary(P.glm &lt;- glm(P ~ habitat + log(meters), family=quasipoisson, data=mot
 ## AIC: NA
 ## 
 ## Number of Fisher Scoring iterations: 6</code></pre>
-<p>The highest numbers relative to the habitat effect are in this case for <code>SWsoak</code> and for <code>Disturbed</code>.<br />
-In contrast to what was observed for <code>A</code> species, in this case we notice that the coefficient relative to <code>log(meters)</code> is statistically significant. Then, the length of the transect make difference to the number of moths observed. In particular for each one meter increase in transect length the number of moths increases with transect length by a factor of approximately $ e^{0.55} 1.74 $.</p>
+<p>The highest coefficients relative to the habitat effect are in this case the ones that refer to <code>SWsoak</code> and <code>Disturbed</code>.<br />
+In contrast to what was observed for <code>A</code> species, in this case we notice that the coefficient relative to <code>log(meters)</code> is statistically significant. Then, the length of the transect influences the number of moths observed. In particular, for each one meter increase in transect length the number of moths increases by a factor of approximately <span class="math inline">\(e^{0.55} \simeq 1.74\)</span>.</p>
 </div>
 <div id="exercise-6-1" class="section level3">
 <h3>Exercise 6</h3>
@@ -859,23 +853,28 @@ In contrast to what was observed for <code>A</code> species, in this case we not
 <p><strong>Solution</strong></p>
 <p><strong>(a)</strong></p>
 <pre class="r"><code>library(DAAG)
-x &lt;- seq(0, 0.99, 0.01)
+library(MASS) # for function confint()
+x &lt;- seq(0, 1, length=101)
 # simulate 100 Poisson responses
-simulated &lt;- poissonsim(x , a = 2, b = -4, seed=123)
+simulated &lt;- poissonsim(x , a = 2, b = -4)
+# fit poisson regression model to these data
 model &lt;- glm(y ~ x, family = poisson, data = simulated)
+# estimated coefficients
 estimated_coeff &lt;- summary(model)$coeff
 estimated_coeff</code></pre>
 <pre><code>##              Estimate Std. Error   z value     Pr(&gt;|z|)
-## (Intercept)  2.169687  0.1036690  20.92897 2.917034e-97
-## x           -4.494277  0.3651332 -12.30860 8.142760e-35</code></pre>
-<pre class="r"><code>simulated2 &lt;- poissonsim(x, a = estimated_coeff[1], b = estimated_coeff[2], seed = 123)
-mean(simulated$y == simulated2$y) # y is the Poisson response vector</code></pre>
-<pre><code>## [1] 0.83</code></pre>
-<p>The predictions of the estimated model are the same as those of the true model in 83% of cases.</p>
+## (Intercept)  1.783069  0.1182839  15.07449 2.383572e-51
+## x           -3.748605  0.3672274 -10.20786 1.828575e-24</code></pre>
+<pre class="r"><code># compute approximate 95% normal confidence intervals for parameter a and b
+confint(model)</code></pre>
+<pre><code>##                 2.5 %    97.5 %
+## (Intercept)  1.545552  2.009524
+## x           -4.492230 -3.050506</code></pre>
+<p>From these results we can see that the estimated coefficients <code>a</code> and <code>b</code> are included into the approximate 95% normal confidence intervals computed with the function <code>confint</code>.<br />
+Regarding to the goodness of the predictions obtained with the estimated model, we can observe that, when <span class="math inline">\(x\)</span> tends to infinity (which corresponds to future predictions) and assuming that the estimated coefficients are such that <span class="math inline">\(\hat a&gt;0\)</span> and <span class="math inline">\(\hat b &lt;0\)</span>, the rate <span class="math inline">\(\lambda\)</span> of the Poisson distribution tends to <span class="math inline">\(0\)</span> and also its variance, since <span class="math inline">\(\lambda=e^{\hat a+ \hat b x}\)</span>. For this reason, regardless of the values of the estimated coefficients, the future predicitons will be really close to the true values since the variance <span class="math inline">\(var(\lambda)\)</span> tends to <span class="math inline">\(0\)</span> as <span class="math inline">\(x\)</span> tends to <span class="math inline">\(+\infty\)</span>.</p>
 <p><strong>(b)</strong></p>
 <pre class="r"><code>x &lt;- seq(0, 0.99, 0.01)
-b &lt;- rnorm(1,4,5)
-simulated &lt;-  poissonsim(x, a = 2, b = -b, slope.sd = 5, seed = 173)
+simulated &lt;-  poissonsim(x, a = 2, b = -4, slope.sd = 5)
 model &lt;- glm(y ~ x, family = poisson, data = simulated)
 model2 &lt;- glm(y ~ x, family = quasipoisson, data = simulated)
 summary(model)</code></pre>
@@ -884,47 +883,47 @@ summary(model)</code></pre>
 ## glm(formula = y ~ x, family = poisson, data = simulated)
 ## 
 ## Deviance Residuals: 
-##    Min      1Q  Median      3Q     Max  
-## -7.522  -5.491  -3.126  -0.124  32.155  
+##     Min       1Q   Median       3Q      Max  
+## -14.791  -11.805   -9.102   -5.972  175.648  
 ## 
 ## Coefficients:
 ##             Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)  1.10023    0.08315   13.23   &lt;2e-16 ***
-## x            2.26483    0.11601   19.52   &lt;2e-16 ***
+## (Intercept)  3.26059    0.03197  102.00   &lt;2e-16 ***
+## x            1.46361    0.04762   30.74   &lt;2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## (Dispersion parameter for poisson family taken to be 1)
 ## 
-##     Null deviance: 4679.3  on 99  degrees of freedom
-## Residual deviance: 4250.1  on 98  degrees of freedom
-## AIC: 4460.1
+##     Null deviance: 42407  on 99  degrees of freedom
+## Residual deviance: 41412  on 98  degrees of freedom
+## AIC: 41655
 ## 
-## Number of Fisher Scoring iterations: 7</code></pre>
+## Number of Fisher Scoring iterations: 11</code></pre>
 <pre class="r"><code>summary(model2)</code></pre>
 <pre><code>## 
 ## Call:
 ## glm(formula = y ~ x, family = quasipoisson, data = simulated)
 ## 
 ## Deviance Residuals: 
-##    Min      1Q  Median      3Q     Max  
-## -7.522  -5.491  -3.126  -0.124  32.155  
+##     Min       1Q   Median       3Q      Max  
+## -14.791  -11.805   -9.102   -5.972  175.648  
 ## 
 ## Coefficients:
 ##             Estimate Std. Error t value Pr(&gt;|t|)  
-## (Intercept)    1.100      0.829   1.327   0.1875  
-## x              2.265      1.157   1.958   0.0531 .
+## (Intercept)    3.261      1.864   1.749   0.0834 .
+## x              1.464      2.777   0.527   0.5994  
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## (Dispersion parameter for quasipoisson family taken to be 99.40147)
+## (Dispersion parameter for quasipoisson family taken to be 3401.222)
 ## 
-##     Null deviance: 4679.3  on 99  degrees of freedom
-## Residual deviance: 4250.1  on 98  degrees of freedom
+##     Null deviance: 42407  on 99  degrees of freedom
+## Residual deviance: 41412  on 98  degrees of freedom
 ## AIC: NA
 ## 
-## Number of Fisher Scoring iterations: 7</code></pre>
-<p>From the <code>summary</code> output we can see that the estimated coefficients are the same for both models. However, in the quasiPoisson model the dispersion parameter is much larger than that of the Poisson model. Thus, we have different standard errors and p-values. Indeed, in the Poisson model both <code>intercept</code> and <code>x</code> are highly significant, while this is no longer true in the quasiPoisson model.</p>
+## Number of Fisher Scoring iterations: 11</code></pre>
+<p>From the <code>summary</code> output we can see that, as expected, the estimated coefficients are the same for both models. However, in the quasiPoisson model the dispersion parameter is much larger than that of the Poisson model. Thus, we have different standard errors and p-values. Indeed, in the Poisson model both <code>intercept</code> and <code>x</code> are highly significant, while this is no longer true in the quasiPoisson model.</p>
 </div>
 </div>
 

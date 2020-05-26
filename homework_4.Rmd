@@ -271,33 +271,31 @@ coef(y.lm2)
 
 **Solution**
 ```{r, echo=TRUE}
-x2 <- rbinom(10, 1, x1) # observed predictor which depends
-# on missing predictor
-y <- 5*x1 + x2 + rnorm(10,sd=.1) # simulated model; coef
-# of x2 is positive
-y.lm <- lm(y ~ factor(x2)) # model fitted to observed data
+x2 <- rbinom(10, 1, x1) 
+y <- 5*x1 + x2 + rnorm(10,sd=.1) 
+y.lm <- lm(y ~ factor(x2)) 
 coef(y.lm)
- # effect of missing variable:
-# coefficient of x2 has wrong sign
-y.lm2 <- lm(y ~ x1 + factor(x2)) # correct model
-coef(y.lm2)
-
 ```
-With `x2 <- rbinom(10, 1, x1)`, in the linear model $y = \beta_0+\beta_2x_2$ the $x_2$ predictor has a positive effect on the response variable (before it had a negative effect, i.e. -1.03) and the intercept has still a positive effect, but lower (from $3.27$ to $1.06$). As regards the model $y = \beta_0+\beta_1x_1+\beta_2x_2$ there is no significant difference than the former situation.
+Comparing this result obtained using `x2 <- rbinom(10, 1, x1)` with the one obtained using `x2 <- rbinom(10, 1, 1-x1)` in the model with only $x_2$ predictor, we can see that the coefficient of $x_2$ has now a positive sign. Moreover, we notice that the coefficient of $x_2$ is much larger than the expected value that is equal to $1$. This is due to the fact that $x_2$ also contains the information of $x_1$ since they are dependent.
+```{r, echo=TRUE}
+y.lm2 <- lm(y ~ x1 + factor(x2))
+coef(y.lm2)
+```
+Adding the missing predictor $x_1$, we can notice that the coefficient of $x_2$ is much smaller than the one obtained before since now the variability of the response variable $y$ is highly explained by $x_1$.
 
 ```{r, echo=TRUE}
-x2 <- rbinom(10, 1, .5) # observed predictor which depends
-# on missing predictor
-y <- 5*x1 + x2 + rnorm(10,sd=.1) # simulated model; coef
-# of x2 is positive
-y.lm <- lm(y ~ factor(x2)) # model fitted to observed data
+x2 <- rbinom(10, 1, .5) 
+y <- 5*x1 + x2 + rnorm(10,sd=.1)
+y.lm <- lm(y ~ factor(x2)) 
 coef(y.lm)
- # effect of missing variable:
-# coefficient of x2 has wrong sign
-y.lm2 <- lm(y ~ x1 + factor(x2)) # correct model
+```
+Since now $x_2$ does not depend anymore on $x_1$, the coefficient of $x_2$ obtained by fitting the model $y=\beta_0 + \beta_2x_2$ is close to $1$ that is the true value of $\beta_2$.
+
+```{r, echo=TRUE}
+y.lm2 <- lm(y ~ x1 + factor(x2)) 
 coef(y.lm2)
 ```
-Finally, for `x2 <- rbinom(10, 1, .5)` we have that the coefficient is independent w.r.t. `x1`. We can notice that the `x2` predictor has positive effect and the second model still behaves in a similar way to the previous ones. However, the coefficient values have decreased compared to those obtained using `x2 <- rbinom(10, 1, x1)`; hence, the effect of the predictors $x_1$ and $x_2$ is reduced.
+Adding $x_1$ to the model, we see that the estimated coefficient of $x_2$ does not change significantly compared to the model in which we have only $x_2$ as predictor. This is due to the fact that now $x_2$ and $x_1$ are independent since `x2 <- rbinom(10, 1, .5)` and therefore $x_2$ does not reflect anymore the information explained by $x_1$.
 
 ## DAAG: Chapter 8: exercises 1,2,3,6.
 
@@ -317,7 +315,7 @@ no <- c(7, 1, 10, 9, 2, 9, 13, 1, 1, 4,  3)
 yes <- c(0, 0, 3, 4, 0, 6, 7, 0, 0, 1, 7)
 tot <- no + yes
 p <- yes / tot      # probability of inhibition
-calls.glm <- glm(p ~ conc, family = binomial, weights = tot)
+calls.glm <- glm(p ~ conc, family = binomial, weights = tot) # logit link is the default
 summary(calls.glm)
 ```
 From these results, we see that a unit increase in `conc` increases the logit with $0.01215$.
@@ -338,7 +336,7 @@ The summary function shows us that the variable `GCS.decrease` is not significan
 model <- glm(clinically.important.brain.injury~.-GCS.decrease, family = binomial, data = minor_head_injury)
 summary(model)
 ```
-In order to obtain a decision rule for use of CT using a risk threshold of $p=0.025$, we have to identify all patients which have a risk greater or equal than $p$. Considering the logit of p, this is equivalent to state that $log\bigg(\frac{p}{1-p}\bigg)=-3.66 \leq \beta_0 + \beta_1x_1+...+\beta_{10}x_{10}$ where $x_i \in \{0,1\}$ (with i=1,...,10). Since the estimated intercept is equal to $-4.4889$, patients will be sent for CT if they have a combination of clinical conditions that returns a value greater or equal to $-3.66+4.4889=0.8289$.   
+In order to obtain a decision rule for use of CT using a risk threshold of $p=0.025$, we have to identify all patients which have a risk greater or equal than $p$. Considering the logit of p, this is equivalent to state that $log\bigg(\frac{p}{1-p}\bigg)=-3.66 \leq \beta_0 + \beta_1x_1+...+\beta_{10}x_{10}$, where $x_i \in \{0,1\}$ (with i=1,...,10). Since the estimated intercept is equal to $-4.4889$, patients will be sent for CT if they have a combination of clinical conditions that returns a value greater or equal to $-3.66+4.4889=0.8289$.   
 This risk results from:  
 
 1. any of the predictors `age.65`, `basal.skull.fracture`, `GCS.13`, `GCS.15.2hours`, `high.risk`, `loss.of.consciousness` and `vomiting`, regardless of the presence or absence of other clinical conditions;  
@@ -362,9 +360,8 @@ summary(A.glm <- glm(A ~ habitat + log(meters), family=quasipoisson, data=moths)
 summary(A.glm <- glm(A ~ habitat + log(meters), family=poisson, data=moths))
 ```
 
-The dispersion estimate was $2.69$. Using the quasipoisson family all the standard errors increase by a factor of $\sqrt{2.69}$ relative to the poisson family.
+The dispersion parameter estimate is $2.69$. Using the quasipoisson family all the standard errors increase by a factor of $\sqrt{2.69}$ compared to the ones of the poisson family.
 Standard errors and p-values taken from a model that assumed Poisson errors would be highly misleading because even if they are low, the model takes into into account assumptions on the data that are not true, like that the dispersion parameter is equal to 1.
-
 
 ```{r}
 sapply(split(moths$P, moths$habitat), sum)
@@ -376,8 +373,8 @@ summary(P.glm <- glm(P ~ habitat + log(meters), family=quasipoisson, data=moths)
 
 ```
 
-The highest numbers relative to the habitat effect are in this case for `SWsoak` and for `Disturbed`.    
-In contrast to what was observed for `A` species, in this case we notice that the coefficient relative to `log(meters)` is statistically significant. Then, the length of the transect make difference to the number of moths observed. In particular for each one meter increase in transect length the number of moths increases with transect length by a factor of approximately $ e^{0.55} \simeq 1.74 $.
+The highest coefficients relative to the habitat effect are in this case the ones that refer to `SWsoak` and `Disturbed`.    
+In contrast to what was observed for `A` species, in this case we notice that the coefficient relative to `log(meters)` is statistically significant. Then, the length of the transect influences the number of moths observed. In particular, for each one meter increase in transect length the number of moths increases by a factor of approximately $e^{0.55} \simeq 1.74$.
 
 
 ### Exercise 6
@@ -396,28 +393,28 @@ where $b$ is normally distributed with mean $4$ and standard deviation $5$. [Use
 **(a)**
 ```{r, echo=TRUE}
 library(DAAG)
-x <- seq(0, 0.99, 0.01)
+library(MASS) # for function confint()
+x <- seq(0, 1, length=101)
 # simulate 100 Poisson responses
-simulated <- poissonsim(x , a = 2, b = -4, seed=123)
+simulated <- poissonsim(x , a = 2, b = -4)
+# fit poisson regression model to these data
 model <- glm(y ~ x, family = poisson, data = simulated)
+# estimated coefficients
 estimated_coeff <- summary(model)$coeff
 estimated_coeff
+# compute approximate 95% normal confidence intervals for parameter a and b
+confint(model)
 ```
-
-```{r, echo=TRUE}
-simulated2 <- poissonsim(x, a = estimated_coeff[1], b = estimated_coeff[2], seed = 123)
-mean(simulated$y == simulated2$y) # y is the Poisson response vector
-```
-The predictions of the estimated model are the same as those of the true model in 83% of cases.  
+From these results we can see that the estimated coefficients `a` and `b` are included into the approximate 95% normal confidence intervals computed with the function `confint`.  
+Regarding to the goodness of the predictions obtained with the estimated model, we can observe that, when $x$ tends to infinity (which corresponds to future predictions) and assuming that the estimated coefficients are such that $\hat a>0$ and $\hat b <0$, the rate $\lambda$ of the Poisson distribution tends to $0$ and also its variance, since $\lambda=e^{\hat a+ \hat b x}$. For this reason, regardless of the values of the estimated coefficients, the future predicitons will be really close to the true values since the variance $var(\lambda)$ tends to $0$ as $x$ tends to $+\infty$.  
 
 **(b)**  
 ```{r, echo=TRUE}
 x <- seq(0, 0.99, 0.01)
-b <- rnorm(1,4,5)
-simulated <-  poissonsim(x, a = 2, b = -b, slope.sd = 5, seed = 173)
+simulated <-  poissonsim(x, a = 2, b = -4, slope.sd = 5)
 model <- glm(y ~ x, family = poisson, data = simulated)
 model2 <- glm(y ~ x, family = quasipoisson, data = simulated)
 summary(model)
 summary(model2)
 ```
-From the `summary` output we can see that the estimated coefficients are the same for both models. However, in the quasiPoisson model the dispersion parameter is much larger than that of the Poisson model. Thus, we have different standard errors and p-values. Indeed, in the Poisson model both `intercept` and `x` are highly significant, while this is no longer true in the quasiPoisson model.
+From the `summary` output we can see that, as expected, the estimated coefficients are the same for both models. However, in the quasiPoisson model the dispersion parameter is much larger than that of the Poisson model. Thus, we have different standard errors and p-values. Indeed, in the Poisson model both `intercept` and `x` are highly significant, while this is no longer true in the quasiPoisson model.
