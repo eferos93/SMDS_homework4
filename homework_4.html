@@ -515,10 +515,10 @@ bootsrap_lm_ridge &lt;- function(formula, data, repetitions, lambda){
 }</code></pre>
 <pre class="r"><code>bootsrap_lm(formula=brainwt~., data=litters, repetitions = 10^4)</code></pre>
 <pre><code>##      2.5%     97.5% 
-## 0.4055956 0.4231443</code></pre>
+## 0.4051804 0.4232254</code></pre>
 <pre class="r"><code>bootsrap_lm_ridge(formula=brainwt~., data=litters, repetitions = 10^4, lambda = 0.118)</code></pre>
 <pre><code>##      2.5%     97.5% 
-## 0.4044386 0.4218736</code></pre>
+## 0.4044515 0.4219634</code></pre>
 <pre class="r"><code>estimate &lt;- data.frame(lsize=10, bodywt=7)
 predict.lm(lm(brainwt~., data=litters), estimate, interval = &quot;confidence&quot;)</code></pre>
 <pre><code>##         fit       lwr       upr
