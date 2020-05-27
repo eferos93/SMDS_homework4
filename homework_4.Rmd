@@ -69,7 +69,7 @@ nihills.lm <- lm(time ~ dist+climb, data=nihills)
 nihills2.lm <- lm(time ~ dist+climb+dist:climb, data=nihills)
 anova(nihills.lm, nihills2.lm)
 ```
-The $F$ test result shows that the probability $Pr(F>=f_{obs})$ is quite low, assuming the null hypotesis $H_0: \beta_{\text{dist x climb}}=0$ is true. Thus we can reject the null hypotesis and therefore say that `nihills2.lm`, the most complex model that includes an interaction term, appears significantly better than `nihills.lm` for `nihills` data.
+The $F$ test result shows that the probability $Pr(F \geq f_{obs})$ is quite low, assuming the null hypotesis $H_0: \beta_{\text{dist x climb}}=0$ is true. Thus we can reject the null hypotesis and therefore say that `nihills2.lm`, the most complex model that includes an interaction term, appears significantly better than `nihills.lm` for `nihills` data.
 
 For having a more precise view of the two models we proceed to examine the diagnostic plots:
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
