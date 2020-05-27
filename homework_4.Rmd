@@ -121,7 +121,7 @@ plot(nihills2.lm)
 
 Without the removed points now it looks that both models don't have problematic points. However, `Slieve Bearnagh` is outside the Cook's distance lines and therefore it can be an influential point.
 
-The $F$ test on the new fitted models shows that there is no significant improvement in the more complex model over the simple one. Thus, the previous tentative choice was a mistake driven by outliers; without them, there is no statistical reason to prefer one model to the other.
+The $F$ test on the new fitted models shows that there is no significant improvement in the more complex model over the simple one. Thus, the previous tentative choice was a mistake driven by problematic points; without them, there is no statistical reason to prefer one model to the other.
 
 ### Exercise 8
 
